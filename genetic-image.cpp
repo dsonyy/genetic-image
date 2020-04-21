@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
@@ -145,6 +146,21 @@ void update(std::set<Specimen, SpecimenComp>& specimens, const sf::Image& img) {
     specimens.insert(best);
 }
 
+void openSVG(std::ofstream& file, const sf::Image & img) {
+    file << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>\n"; 
+    file << "<svg width='" << img.getSize().x << "' height='" << img.getSize().y << "' xmlns = 'http://www.w3.org/2000/svg'>\n";
+    file << "<rect fill='#000' width='" << img.getSize().x << "' height='" << img.getSize().y << "'/>\n";
+}
+
+void closeSVG(std::ofstream& file) {
+    file << "</svg>";
+    file.close();
+}
+
+void updateSVG(std::ofstream& file, const Triangle t) {
+    file << "<polygon points='" << t.v[0].x << "," << t.v[0].y << " " << t.v[1].x << "," << t.v[1].y << " " << t.v[2].x << "," << t.v[2].y << "' style='fill:rgb(" << int(t.c.r) << "," << int(t.c.g) << "," << int(t.c.b) << "); opacity:0.5'/>\n";
+}
+
 void usage() {
     std::cout << "Usage:\n\tGeneticImage FILENAME" << std::endl;
 }
@@ -187,6 +203,9 @@ int main(int argc, char ** argv)
 
     sf::Clock clock;
 
+    std::ofstream svg("output.svg");
+    openSVG(svg, img);
+
     sf::RenderWindow window(sf::VideoMode(size.x * 2, size.y), "Designer", sf::Style::Close | sf::Style::Titlebar);
     bool running = true;
     while (running) {
@@ -215,10 +234,13 @@ int main(int argc, char ** argv)
         genTxtr.update(specimens.begin()->buffer);
 
         window.display();
+
+        updateSVG(svg, specimens.begin()->triangles.back());
         
         update(specimens, img);
         iteration++;
     }
 
+    closeSVG(svg);
     return 0;
 }
