@@ -205,6 +205,7 @@ int main(int argc, char ** argv)
 
     std::ofstream svg("output.svg");
     openSVG(svg, img);
+    Triangle lastTriangle;
 
     sf::RenderWindow window(sf::VideoMode(size.x * 2, size.y), "Designer", sf::Style::Close | sf::Style::Titlebar);
     bool running = true;
@@ -235,7 +236,11 @@ int main(int argc, char ** argv)
 
         window.display();
 
-        updateSVG(svg, specimens.begin()->triangles.back());
+        Triangle newTriangle = specimens.begin()->triangles.back();
+        if (!(newTriangle.v[0] == lastTriangle.v[0] && newTriangle.v[1] == lastTriangle.v[1] && newTriangle.v[2] == lastTriangle.v[2] && newTriangle.c == lastTriangle.c)) {
+            updateSVG(svg, specimens.begin()->triangles.back());
+            lastTriangle = newTriangle;
+        }
         
         update(specimens, img);
         iteration++;
